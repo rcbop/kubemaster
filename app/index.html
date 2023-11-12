@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server Information</title>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      border: 1px solid #ccc;
+      padding: 20px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Server Information</h2>
+    <p><strong>IP Address:</strong> <span id="ip-address">Loading...</span></p>
+    <p><strong>Route/Path:</strong> <span id="route-path">Loading...</span></p>
+    <p><strong>Current Time:</strong> <span id="current-time">Loading...</span></p>
+    <p><strong>Version:</strong> <span id="version"><VERSION_PLACEHOLDER></span></p>
+  </div>
+
+  <script>
+    // Fetch IP address from an external service
+    fetch('https://api64.ipify.org?format=json')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('ip-address').innerText = data.ip;
+      })
+      .catch(error => {
+        console.error('Error fetching IP address:', error);
+        document.getElementById('ip-address').innerText = 'Error';
+      });
+
+    // Get current route/path
+    document.getElementById('route-path').innerText = window.location.pathname;
+
+    // Update current time every second
+    function updateTime() {
+      const currentTime = new Date().toLocaleString();
+      document.getElementById('current-time').innerText = currentTime;
+    }
+
+    updateTime(); // Initial call
+    setInterval(updateTime, 1000); // Update every second
+  </script>
+</body>
+</html>
