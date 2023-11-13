@@ -8,4 +8,5 @@ resources:
 
 images:
 - name: my-nginx-server
-  newTag: 1.0.0
+  newName: ghcr.io/rcbop/my-nginx-server
+  newTag: 1.1.0
