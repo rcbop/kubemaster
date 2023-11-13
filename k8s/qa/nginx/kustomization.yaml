@@ -8,4 +8,4 @@ resources:
 
 images:
 - name: my-nginx-server
-  newTag: 1.0.0
+  newName: 1.0.0
