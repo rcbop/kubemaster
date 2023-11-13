@@ -6,7 +6,7 @@ metadata:
 spec:
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: default
+    namespace: dev
   project: default
   source:
     repoURL: 'https://github.com/rcbop/kubemaster.git'
