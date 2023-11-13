@@ -81,6 +81,8 @@ jobs:
           context: app
           push: true
           tags: ghcr.io/rcbop/my-nginx-server:${{ steps.determine-version.outputs.version }}
+          build-args: |
+            VERSION=${{ steps.determine-version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Deploy to DEV
