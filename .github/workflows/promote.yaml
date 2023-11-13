@@ -17,10 +17,10 @@ jobs:
 
       - name: Update kustomization file
         run: |
-          IMAGE_NAME=$(yq '.images[0].newName' dev/nginx/kustomization.yaml)
-          IMAGE_TAG=$(yq '.images[0].newTag' dev/nginx/kustomization.yaml)
-          cd qa/nginx
-          kustomize edit set image my-nginx-name=$IMAGE_NAME:$IMAGE_TAG
+          IMAGE_NAME=$(yq '.images[0].newName' k8s/dev/nginx/kustomization.yaml)
+          IMAGE_TAG=$(yq '.images[0].newTag' k8s/dev/nginx/kustomization.yaml)
+          cd k8s/qa/nginx
+          kustomize edit set image my-nginx-server=$IMAGE_NAME:$IMAGE_TAG
 
       - name: Commit and push changes
         run: |
