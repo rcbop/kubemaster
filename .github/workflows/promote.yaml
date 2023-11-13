@@ -1,0 +1,38 @@
+name: Promote to QA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update kustomization file
+        run: |
+          IMAGE_NAME=$(yq '.images[0].newName' dev/nginx/kustomization.yaml)
+          IMAGE_TAG=$(yq '.images[0].newTag' dev/nginx/kustomization.yaml)
+          cd qa/nginx
+          kustomize edit set image my-nginx-name=$IMAGE_NAME:$IMAGE_TAG
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add .
+          git commit -m "Promote image to QA"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: Promoting image to QA
+          commit-message: Promoting image to QA
+          branch: promote-to-qa
+          delete-branch: true

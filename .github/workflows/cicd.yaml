@@ -1,4 +1,4 @@
-name: CI
+name: CICD
 
 on:
   push:
@@ -33,9 +33,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: check-for-changes
     if: needs.check-for-changes.outputs.changes == 'true'
+
     permissions:
-      contents: read
+      contents: write
       packages: write
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -47,12 +49,13 @@ jobs:
       - name: Determine new version
         id: determine-version
         run: |
+          pip install semver
           if grep -q PATCH <<< "${{ github.event.head_commit.message }}"; then
-            echo "version=$(semver bump patch ${{ steps.read-version.outputs.version }})" >> $GITHUB_OUTPUT
+            echo "version=$(python ./bump_version.py PATCH ${{ steps.read-version.outputs.version }})" >> $GITHUB_OUTPUT
           elif grep -q MINOR <<< "${{ github.event.head_commit.message }}"; then
-            echo "version=$(semver bump minor ${{ steps.read-version.outputs.version }})" >> $GITHUB_OUTPUT
+            echo "version=$(python ./bump_version.py MINOR ${{ steps.read-version.outputs.version }})" >> $GITHUB_OUTPUT
           elif grep -q MAJOR <<< "${{ github.event.head_commit.message }}"; then
-            echo "version=$(semver bump major ${{ steps.read-version.outputs.version }})" >> $GITHUB_OUTPUT
+            echo "version=$(python ./bump_version.py MAJOR ${{ steps.read-version.outputs.version }})" >> $GITHUB_OUTPUT
           else
             echo version=${{ steps.read-version.outputs.version }} >> $GITHUB_OUTPUT
           fi
@@ -80,21 +83,12 @@ jobs:
           tags: ghcr.io/rcbop/my-nginx-server:${{ steps.determine-version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Update Kustomization files DEV
+      - name: Deploy to DEV
         run: |
           for kustomization in $(find k8s/dev -name kustomization.yaml); do
             dir=$(dirname $kustomization)
             cd $dir
-            kustomize edit set image my-nginx-server=${{ steps.determine-version.outputs.version }}
-            cd -
-          done
-
-      - name: Update Kustomization files QA
-        run: |
-          for kustomization in $(find k8s/qa -name kustomization.yaml); do
-            dir=$(dirname $kustomization)
-            cd $dir
-            kustomize edit set image my-nginx-server=${{ steps.determine-version.outputs.version }}
+            kustomize edit set image my-nginx-server=ghcr.io/rcbop/my-nginx-server:${{ steps.determine-version.outputs.version }}
             cd -
           done
 
@@ -107,12 +101,4 @@ jobs:
           git config --global user.name "GitHub Actions"
           git add .
           git commit -m "Bump version to ${{ steps.determine-version.outputs.version }}"
-
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          commit-message: Bump version to ${{ steps.determine-version.outputs.version }}
-          title: Bump version to ${{ steps.determine-version.outputs.version }}
-          branch: version-bump
-          base: main
-          token: ${{ secrets.GH_PAT }}
+          git push origin main
