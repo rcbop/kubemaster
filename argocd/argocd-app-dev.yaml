@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/rcbop/kubemaster.git'
-    path: 'k8s'
+    path: k8s/dev/nginx
     targetRevision: HEAD
   syncPolicy:
     automated:
